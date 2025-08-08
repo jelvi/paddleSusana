@@ -469,7 +469,7 @@ def show_login():
 
 def show_main_app():
     """Muestra la aplicación principal"""
-    st.title("🎾Torneo de Pádel")
+    st.title("🎾Pádel")
 
     # Menú de navegación
     tabs = st.tabs(["📊 Dashboard", "👥 Parejas", "🏆 Partidos", "📈 Clasificación", "⚙️ Configuración"])
@@ -492,7 +492,7 @@ def show_main_app():
 
 def show_dashboard():
     """Muestra el dashboard principal con estadísticas"""
-    st.header("📊 Dashboard del Torneo")
+    st.header("📊 Dashboard")
 
     torneo = initialize_tournament()
 
@@ -575,7 +575,7 @@ def show_dashboard():
 
 def show_parejas_management():
     """Gestión de parejas"""
-    st.header("👥 Gestión de Parejas")
+    st.header("👥 Parejas")
 
     # Formulario para añadir pareja
     st.subheader("➕ Añadir Nueva Pareja")
@@ -632,7 +632,7 @@ def show_parejas_management():
 
 def show_partidos_management():
     """Gestión de partidos"""
-    st.header("🏆 Gestión de Partidos")
+    st.header("🏆 Partidos")
 
     torneo = initialize_tournament()
 
