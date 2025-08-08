@@ -12,34 +12,47 @@ st.set_page_config(
     page_title="Torneo de Pádel",
     page_icon="🎾",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
-# CSS personalizado para optimización móvil
+# CSS personalizado para título compacto y tema claro
 st.markdown("""
 <style>
 /* --- Estilos generales para fondo y texto --- */
 body, .main, .block-container {
-    background-color: #f8fafc;  /* fondo muy claro */
-    color: #222222;              /* texto oscuro para buena lectura */
+    background-color: #f8fafc;
+    color: #222222;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* --- Botones grandes y accesibles --- */
+/* --- Títulos compactos (con poco margen vertical) --- */
+h1, h2, h3 {
+    margin-top: 0.2rem;
+    margin-bottom: 0.2rem;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.2;
+}
+
+/* --- Botones grandes y accesibles sin fondo azul --- */
 div.stButton > button {
     width: 100%;
-    height: 3.2rem;
-    font-size: 1.2rem;
-    font-weight: 600;
-    border-radius: 0.5rem;
-    background-color: #3b82f6; /* azul brillante */
-    color: white;
-    border: none;
-    transition: background-color 0.3s ease;
-    margin: 0.5rem 0;
+    padding: 1rem;
+    font-size: 1.15rem;
+    border-radius: 0.6rem;
+    background-color: transparent;
+    color: #111827;
+    border: 2px solid transparent;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    margin-bottom: 0.5rem;
+    text-align: left;
+    user-select: none;
 }
 div.stButton > button:hover {
-    background-color: #2563eb; /* azul más oscuro */
+    background-color: #e0e7ff;
+    border-color: #3b82f6;
+    color: #1e3a8a;
+    font-weight: 700;
 }
 
 /* --- Inputs y selects grandes y claros --- */
@@ -67,7 +80,7 @@ div.stButton > button:hover {
     padding: 1rem 1.2rem;
     border-radius: 12px;
     margin: 0.6rem 0;
-    border-left: 6px solid #3b82f6; /* acento azul */
+    border-left: 6px solid #3b82f6;
     box-shadow: 0 2px 8px rgb(59 130 246 / 0.2);
     color: #222222;
     user-select: none;
@@ -89,7 +102,7 @@ div.stButton > button:hover {
     padding: 1.4rem 1.6rem;
     border-radius: 14px;
     margin: 1.2rem 0;
-    border: 2px solid #e0e7ff; /* azul muy claro */
+    border: 2px solid #e0e7ff;
     box-shadow: 0 3px 9px rgb(99 102 241 / 0.15);
     color: #222222;
 }
@@ -163,16 +176,6 @@ div.stButton > button:hover {
     padding-top: 1rem;
 }
 
-/* Logo ajustado */
-.sidebar img {
-    margin-bottom: 1rem;
-    max-width: 160px;
-    object-fit: contain;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-
 /* Usuario y botones en sidebar */
 .sidebar > div > div {
     font-weight: 600;
@@ -189,12 +192,6 @@ div.stButton > button:hover {
     color: #1e40af !important;
 }
 
-/* Títulos principales */
-h1, h2, h3 {
-    color: #111827;
-    font-weight: 700;
-}
-
 /* Métricas */
 .metric-container {
     background: #e0e7ff;
@@ -209,7 +206,7 @@ h1, h2, h3 {
 </style>
 """, unsafe_allow_html=True)
 
-# Configuración de cookies
+# Configuración de cookies cifradas
 cookies = EncryptedCookieManager(
     prefix="padel_app_",
     password="tu_clave_secreta_muy_larga_y_segura_123456789"
@@ -222,16 +219,13 @@ if not cookies.ready():
 USUARIOS_FILE = "usuarios.json"
 TORNEO_FILE = "torneo_parejas.json"
 
-
-# Funciones de utilidad para archivos JSON
+# Funciones de utilidad
 def load_json(filename, default_content=None):
-    """Carga un archivo JSON o crea uno por defecto si no existe"""
     if default_content is None:
         default_content = {}
-
     try:
         if os.path.exists(filename):
-            with open(filename, 'r', encoding='utf-8') as f:
+            with open(filename, "r", encoding="utf-8") as f:
                 return json.load(f)
         else:
             save_json(filename, default_content)
@@ -240,38 +234,28 @@ def load_json(filename, default_content=None):
         st.error(f"Error cargando {filename}: {e}")
         return default_content
 
-
 def save_json(filename, data):
-    """Guarda datos en un archivo JSON"""
     try:
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filename, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as e:
         st.error(f"Error guardando {filename}: {e}")
 
-
 # Funciones de autenticación
 def hash_password(password):
-    """Hashea una contraseña usando SHA-256"""
     return hashlib.sha256(password.encode()).hexdigest()
 
-
 def verify_password(password, hashed):
-    """Verifica una contraseña contra su hash"""
     return hash_password(password) == hashed
 
-
 def initialize_users():
-    """Inicializa el archivo de usuarios con admin por defecto"""
     users = load_json(USUARIOS_FILE, {})
     if "admin" not in users:
-        users["admin"] = hash_password("IMSusana50")
+        users["admin"] = hash_password("IMSusana50")  # Contraseña por defecto actualizada
         save_json(USUARIOS_FILE, users)
     return users
 
-
 def login_user(username, password):
-    """Autentica un usuario"""
     users = load_json(USUARIOS_FILE, {})
     if username in users and verify_password(password, users[username]):
         cookies["authenticated"] = "true"
@@ -280,84 +264,57 @@ def login_user(username, password):
         return True
     return False
 
-
 def is_authenticated():
-    """Verifica si el usuario está autenticado"""
     return cookies.get("authenticated") == "true"
 
-
 def get_current_user():
-    """Obtiene el usuario actual"""
     return cookies.get("username")
 
-
 def logout_user():
-    """Cierra sesión del usuario"""
     cookies["authenticated"] = ""
     cookies["username"] = ""
     cookies.save()
 
-
-# Funciones del torneo
+# Funciones torneo (igual que antes)
 def initialize_tournament():
-    """Inicializa el archivo del torneo"""
     return load_json(TORNEO_FILE, {"parejas": [], "partidos": []})
 
-
 def add_pareja(jugador1, jugador2):
-    """Añade una nueva pareja al torneo"""
     torneo = initialize_tournament()
-
-    # Verificar que los jugadores no estén ya en otras parejas
     jugadores_existentes = []
     for pareja in torneo["parejas"]:
         jugadores_existentes.extend(pareja["jugadores"])
-
     if jugador1 in jugadores_existentes or jugador2 in jugadores_existentes:
         return False, "Uno de los jugadores ya está en otra pareja"
-
     nueva_pareja = {
         "id": len(torneo["parejas"]) + 1,
         "jugadores": [jugador1, jugador2],
         "victorias": 0,
         "derrotas": 0
     }
-
     torneo["parejas"].append(nueva_pareja)
     save_json(TORNEO_FILE, torneo)
     return True, "Pareja añadida correctamente"
 
-
 def remove_pareja(pareja_id):
-    """Elimina una pareja del torneo"""
     torneo = initialize_tournament()
     torneo["parejas"] = [p for p in torneo["parejas"] if p["id"] != pareja_id]
-    # También eliminar partidos que involucren esta pareja
-    torneo["partidos"] = [p for p in torneo["partidos"]
-                          if p["pareja1_id"] != pareja_id and p["pareja2_id"] != pareja_id]
+    torneo["partidos"] = [p for p in torneo["partidos"] if p["pareja1_id"] != pareja_id and p["pareja2_id"] != pareja_id]
     save_json(TORNEO_FILE, torneo)
 
-
 def generate_jornada():
-    """Genera todos los partidos posibles entre parejas que no se hayan enfrentado"""
     torneo = initialize_tournament()
     parejas = torneo["parejas"]
-
     if len(parejas) < 2:
         return False, "Se necesitan al menos 2 parejas para generar una jornada"
-
-    # Obtener enfrentamientos ya realizados
     enfrentamientos_hechos = set()
     for partido in torneo["partidos"]:
         pareja1_id = partido["pareja1_id"]
         pareja2_id = partido["pareja2_id"]
         enfrentamientos_hechos.add((min(pareja1_id, pareja2_id), max(pareja1_id, pareja2_id)))
-
-    # Generar todas las combinaciones posibles
     nuevos_partidos = []
     for pareja1, pareja2 in combinations(parejas, 2):
         enfrentamiento = (min(pareja1["id"], pareja2["id"]), max(pareja1["id"], pareja2["id"]))
-
         if enfrentamiento not in enfrentamientos_hechos:
             nuevo_partido = {
                 "id": len(torneo["partidos"]) + len(nuevos_partidos) + 1,
@@ -367,30 +324,22 @@ def generate_jornada():
                 "fecha": datetime.now().isoformat()
             }
             nuevos_partidos.append(nuevo_partido)
-
     if not nuevos_partidos:
         return False, "No hay nuevos enfrentamientos por generar"
-
     torneo["partidos"].extend(nuevos_partidos)
     save_json(TORNEO_FILE, torneo)
     return True, f"Se generaron {len(nuevos_partidos)} nuevos partidos"
 
-
 def update_resultado(partido_id, ganador_id):
-    """Actualiza el resultado de un partido"""
     torneo = initialize_tournament()
-
     for partido in torneo["partidos"]:
         if partido["id"] == partido_id:
-            # Revertir resultado anterior si existía
             if partido["ganador_id"]:
                 for pareja in torneo["parejas"]:
                     if pareja["id"] == partido["ganador_id"]:
                         pareja["victorias"] -= 1
                     elif pareja["id"] in [partido["pareja1_id"], partido["pareja2_id"]]:
                         pareja["derrotas"] -= 1
-
-            # Aplicar nuevo resultado
             partido["ganador_id"] = ganador_id
             for pareja in torneo["parejas"]:
                 if pareja["id"] == ganador_id:
@@ -398,61 +347,62 @@ def update_resultado(partido_id, ganador_id):
                 elif pareja["id"] in [partido["pareja1_id"], partido["pareja2_id"]]:
                     pareja["derrotas"] += 1
             break
-
     save_json(TORNEO_FILE, torneo)
 
-
 def get_clasificacion():
-    """Obtiene la clasificación actual ordenada por victorias"""
     torneo = initialize_tournament()
     parejas = torneo["parejas"].copy()
     parejas.sort(key=lambda x: (-x["victorias"], x["derrotas"]))
     return parejas
 
-
 def reset_tournament():
-    """Reinicia el torneo eliminando todas las parejas y partidos"""
-    torneo_inicial = {"parejas": [], "partidos": []}
-    save_json(TORNEO_FILE, torneo_inicial)
-
+    save_json(TORNEO_FILE, {"parejas": [], "partidos": []})
 
 # Interfaz principal
 def main():
-    # Inicializar usuarios
     initialize_users()
 
-    # Sidebar
     with st.sidebar:
-        #st.image("https://miraqueta.com/wp-content/uploads/2022/07/PADELBCN_Skyline_Det01.jpg", width=150)
+        # Título compacto en sidebar
+        st.markdown("<h1 style='font-size:2rem; margin:0.2rem 0; line-height:1.2;'>🎾 Pádel</h1>", unsafe_allow_html=True)
 
+        st.markdown("### Navegación")
+        pages = {
+            "📊 Dashboard": "Dashboard",
+            "👥 Parejas": "Parejas",
+            "🏆 Partidos": "Partidos",
+            "📈 Clasificación": "Clasificación",
+            "⚙️ Configuración": "Configuración"
+        }
         if is_authenticated():
             st.success(f"👋 {get_current_user()}")
+            for label, page_key in pages.items():
+                if st.button(label, key=page_key):
+                    st.session_state.page = page_key
             if st.button("🚪 Cerrar Sesión", use_container_width=True):
                 logout_user()
                 st.rerun()
         else:
             st.info("🔒 No autenticado")
 
-    # Control de autenticación
+
+    if "page" not in st.session_state:
+        st.session_state.page = "Dashboard"
+
     if not is_authenticated():
         show_login()
     else:
-        show_main_app()
-
+        show_main_app(st.session_state.page)
 
 def show_login():
-    """Muestra la pantalla de login"""
-    st.title("🎾 Torneo de Pádel")
+    st.markdown("<h1 style='font-size:2rem; margin:0.2rem 0; line-height:1.2;'>🎾 Pádel</h1>", unsafe_allow_html=True)
     st.markdown("### 🔐 Iniciar Sesión")
-
     col1, col2, col3 = st.columns([1, 2, 1])
-
     with col2:
         with st.form("login_form"):
             username = st.text_input("👤 Usuario", placeholder="Ingrese su usuario")
             password = st.text_input("🔑 Contraseña", type="password", placeholder="Ingrese su contraseña")
             login_button = st.form_submit_button("🚀 Iniciar Sesión", use_container_width=True)
-
             if login_button:
                 if username and password:
                     if login_user(username, password):
@@ -462,31 +412,20 @@ def show_login():
                         st.error("❌ Usuario o contraseña incorrectos")
                 else:
                     st.error("⚠️ Por favor, complete todos los campos")
-
         st.markdown("---")
-        st.info("🔑 Susana tiene que darte un usuario valido para entrar")
+        st.info("🔑 **Usuario por defecto:**\n\n**Usuario:** admin\n\n**Contraseña:** IMSusana50")
 
-
-def show_main_app():
-    """Muestra la aplicación principal"""
-    st.title("🎾Pádel")
-
-    # Menú de navegación
-    tabs = st.tabs(["📊 Dashboard", "👥 Parejas", "🏆 Partidos", "📈 Clasificación", "⚙️ Configuración"])
-
-    with tabs[0]:
+def show_main_app(page):
+    st.title("🎾 Pádel 50")
+    if page == "Dashboard":
         show_dashboard()
-
-    with tabs[1]:
+    elif page == "Parejas":
         show_parejas_management()
-
-    with tabs[2]:
+    elif page == "Partidos":
         show_partidos_management()
-
-    with tabs[3]:
+    elif page == "Clasificación":
         show_clasificacion()
-
-    with tabs[4]:
+    elif page == "Configuración":
         show_configuration()
 
 
