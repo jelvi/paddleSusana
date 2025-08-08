@@ -464,7 +464,7 @@ def show_login():
                     st.error("⚠️ Por favor, complete todos los campos")
 
         st.markdown("---")
-        st.info("🔑 **Usuario por defecto:**\n\n**Usuario:** admin\n\n**Contraseña:** IMissanas8")
+        st.info("🔑 Susana tiene que darte un usuario valido para entrar")
 
 
 def show_main_app():
