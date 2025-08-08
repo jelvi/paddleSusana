@@ -469,7 +469,7 @@ def show_login():
 
 def show_main_app():
     """Muestra la aplicación principal"""
-    st.title("🎾 Gestión de Torneo de Pádel")
+    st.title("🎾Torneo de Pádel")
 
     # Menú de navegación
     tabs = st.tabs(["📊 Dashboard", "👥 Parejas", "🏆 Partidos", "📈 Clasificación", "⚙️ Configuración"])
