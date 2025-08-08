@@ -35,6 +35,15 @@
       ],
       "victorias": 0,
       "derrotas": 0
+    },
+    {
+      "id": 5,
+      "jugadores": [
+        "Hugo",
+        "Vega"
+      ],
+      "victorias": 0,
+      "derrotas": 0
     }
   ],
   "partidos": [
@@ -79,6 +88,34 @@
       "pareja2_id": 4,
       "ganador_id": null,
       "fecha": "2025-08-08T15:37:26.574429"
+    },
+    {
+      "id": 7,
+      "pareja1_id": 1,
+      "pareja2_id": 5,
+      "ganador_id": null,
+      "fecha": "2025-08-08T15:50:43.230306"
+    },
+    {
+      "id": 8,
+      "pareja1_id": 2,
+      "pareja2_id": 5,
+      "ganador_id": null,
+      "fecha": "2025-08-08T15:50:43.230318"
+    },
+    {
+      "id": 9,
+      "pareja1_id": 3,
+      "pareja2_id": 5,
+      "ganador_id": null,
+      "fecha": "2025-08-08T15:50:43.230322"
+    },
+    {
+      "id": 10,
+      "pareja1_id": 4,
+      "pareja2_id": 5,
+      "ganador_id": null,
+      "fecha": "2025-08-08T15:50:43.230325"
     }
   ]
 }

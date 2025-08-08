@@ -219,7 +219,8 @@ if not cookies.ready():
 USUARIOS_FILE = "usuarios.json"
 TORNEO_FILE = "torneo_parejas.json"
 
-# Funciones de utilidad
+
+# Utilidades JSON
 def load_json(filename, default_content=None):
     if default_content is None:
         default_content = {}
@@ -234,6 +235,7 @@ def load_json(filename, default_content=None):
         st.error(f"Error cargando {filename}: {e}")
         return default_content
 
+
 def save_json(filename, data):
     try:
         with open(filename, "w", encoding="utf-8") as f:
@@ -241,12 +243,15 @@ def save_json(filename, data):
     except Exception as e:
         st.error(f"Error guardando {filename}: {e}")
 
-# Funciones de autenticación
+
+# Autenticación
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
+
 def verify_password(password, hashed):
     return hash_password(password) == hashed
+
 
 def initialize_users():
     users = load_json(USUARIOS_FILE, {})
@@ -254,6 +259,7 @@ def initialize_users():
         users["admin"] = hash_password("IMSusana50")  # Contraseña por defecto actualizada
         save_json(USUARIOS_FILE, users)
     return users
+
 
 def login_user(username, password):
     users = load_json(USUARIOS_FILE, {})
@@ -264,20 +270,25 @@ def login_user(username, password):
         return True
     return False
 
+
 def is_authenticated():
     return cookies.get("authenticated") == "true"
 
+
 def get_current_user():
     return cookies.get("username")
+
 
 def logout_user():
     cookies["authenticated"] = ""
     cookies["username"] = ""
     cookies.save()
 
-# Funciones torneo (igual que antes)
+
+# Torneo
 def initialize_tournament():
     return load_json(TORNEO_FILE, {"parejas": [], "partidos": []})
+
 
 def add_pareja(jugador1, jugador2):
     torneo = initialize_tournament()
@@ -296,11 +307,14 @@ def add_pareja(jugador1, jugador2):
     save_json(TORNEO_FILE, torneo)
     return True, "Pareja añadida correctamente"
 
+
 def remove_pareja(pareja_id):
     torneo = initialize_tournament()
     torneo["parejas"] = [p for p in torneo["parejas"] if p["id"] != pareja_id]
-    torneo["partidos"] = [p for p in torneo["partidos"] if p["pareja1_id"] != pareja_id and p["pareja2_id"] != pareja_id]
+    torneo["partidos"] = [p for p in torneo["partidos"] if
+                          p["pareja1_id"] != pareja_id and p["pareja2_id"] != pareja_id]
     save_json(TORNEO_FILE, torneo)
+
 
 def generate_jornada():
     torneo = initialize_tournament()
@@ -330,6 +344,7 @@ def generate_jornada():
     save_json(TORNEO_FILE, torneo)
     return True, f"Se generaron {len(nuevos_partidos)} nuevos partidos"
 
+
 def update_resultado(partido_id, ganador_id):
     torneo = initialize_tournament()
     for partido in torneo["partidos"]:
@@ -349,41 +364,47 @@ def update_resultado(partido_id, ganador_id):
             break
     save_json(TORNEO_FILE, torneo)
 
+
 def get_clasificacion():
     torneo = initialize_tournament()
     parejas = torneo["parejas"].copy()
     parejas.sort(key=lambda x: (-x["victorias"], x["derrotas"]))
     return parejas
 
+
 def reset_tournament():
     save_json(TORNEO_FILE, {"parejas": [], "partidos": []})
 
-# Interfaz principal
+
+# UI
 def main():
     initialize_users()
 
     with st.sidebar:
         # Título compacto en sidebar
-        st.markdown("<h1 style='font-size:2rem; margin:0.2rem 0; line-height:1.2;'>🎾 Pádel</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='font-size:2rem; margin:0.2rem 0; line-height:1.2;'>🎾 Pádel</h1>",
+                    unsafe_allow_html=True)
 
-        st.markdown("### Navegación")
-        pages = {
-            "📊 Dashboard": "Dashboard",
-            "👥 Parejas": "Parejas",
-            "🏆 Partidos": "Partidos",
-            "📈 Clasificación": "Clasificación",
-            "⚙️ Configuración": "Configuración"
-        }
         if is_authenticated():
             st.success(f"👋 {get_current_user()}")
+            st.markdown("### Navegación")
+            pages = {
+                "📊 Dashboard": "Dashboard",
+                "👥 Parejas": "Parejas",
+                "🏆 Partidos": "Partidos",
+                "📈 Clasificación": "Clasificación",
+                "⚙️ Configuración": "Configuración"
+            }
             for label, page_key in pages.items():
-                if st.button(label, key=page_key):
+                if st.button(label, key=f"menu_btn_{page_key}"):
                     st.session_state.page = page_key
             if st.button("🚪 Cerrar Sesión", use_container_width=True):
                 logout_user()
                 st.rerun()
         else:
             st.info("🔒 No autenticado")
+
+
 
 
     if "page" not in st.session_state:
@@ -393,6 +414,7 @@ def main():
         show_login()
     else:
         show_main_app(st.session_state.page)
+
 
 def show_login():
     st.markdown("<h1 style='font-size:2rem; margin:0.2rem 0; line-height:1.2;'>🎾 Pádel</h1>", unsafe_allow_html=True)
@@ -413,7 +435,8 @@ def show_login():
                 else:
                     st.error("⚠️ Por favor, complete todos los campos")
         st.markdown("---")
-        st.info("🔑 **Usuario por defecto:**\n\n**Usuario:** admin\n\n**Contraseña:** IMSusana50")
+        st.info("🔑 Susana os tendrá que dar un user")
+
 
 def show_main_app(page):
     st.title("🎾 Pádel 50")
@@ -430,104 +453,76 @@ def show_main_app(page):
 
 
 def show_dashboard():
-    """Muestra el dashboard principal con estadísticas"""
-    st.header("📊 Dashboard")
-
+    st.header("📊 Dashboard del Torneo")
     torneo = initialize_tournament()
-
-    # Métricas principales
     col1, col2, col3, col4 = st.columns(4)
-
     with col1:
-        st.markdown("""
+        st.markdown(f"""
         <div class="metric-container">
             <h3>👥</h3>
-            <h2>""" + str(len(torneo["parejas"])) + """</h2>
+            <h2>{len(torneo['parejas'])}</h2>
             <p>Parejas</p>
-        </div>
-        """, unsafe_allow_html=True)
-
+        </div>""", unsafe_allow_html=True)
     with col2:
-        st.markdown("""
+        st.markdown(f"""
         <div class="metric-container">
             <h3>🏆</h3>
-            <h2>""" + str(len(torneo["partidos"])) + """</h2>
+            <h2>{len(torneo['partidos'])}</h2>
             <p>Partidos</p>
-        </div>
-        """, unsafe_allow_html=True)
-
+        </div>""", unsafe_allow_html=True)
+    partidos_jugados = len([p for p in torneo["partidos"] if p["ganador_id"]])
+    partidos_pendientes = len([p for p in torneo["partidos"] if not p["ganador_id"]])
     with col3:
-        partidos_jugados = len([p for p in torneo["partidos"] if p["ganador_id"]])
-        st.markdown("""
+        st.markdown(f"""
         <div class="metric-container">
             <h3>✅</h3>
-            <h2>""" + str(partidos_jugados) + """</h2>
+            <h2>{partidos_jugados}</h2>
             <p>Completados</p>
-        </div>
-        """, unsafe_allow_html=True)
-
+        </div>""", unsafe_allow_html=True)
     with col4:
-        partidos_pendientes = len([p for p in torneo["partidos"] if not p["ganador_id"]])
-        st.markdown("""
+        st.markdown(f"""
         <div class="metric-container">
             <h3>⏳</h3>
-            <h2>""" + str(partidos_pendientes) + """</h2>
+            <h2>{partidos_pendientes}</h2>
             <p>Pendientes</p>
-        </div>
-        """, unsafe_allow_html=True)
-
+        </div>""", unsafe_allow_html=True)
     st.markdown("---")
-
-    # Próximos partidos
     if torneo["partidos"]:
         st.subheader("⏳ Próximos Partidos")
         partidos_pendientes = [p for p in torneo["partidos"] if not p["ganador_id"]][:3]
-
         if partidos_pendientes:
             for partido in partidos_pendientes:
                 pareja1 = next(p for p in torneo["parejas"] if p["id"] == partido["pareja1_id"])
                 pareja2 = next(p for p in torneo["parejas"] if p["id"] == partido["pareja2_id"])
-
                 st.markdown(f"""
                 <div class="partido-card">
                     <div class="partido-header">Partido #{partido["id"]}</div>
                     <p><strong>{" & ".join(pareja1["jugadores"])}</strong> vs <strong>{" & ".join(pareja2["jugadores"])}</strong></p>
-                </div>
-                """, unsafe_allow_html=True)
+                </div>""", unsafe_allow_html=True)
         else:
             st.info("🎉 ¡Todos los partidos han sido completados!")
-
-    # Clasificación resumida
     if torneo["parejas"]:
         st.subheader("🏆 Top 3 Clasificación")
         clasificacion = get_clasificacion()[:3]
-
         for i, pareja in enumerate(clasificacion):
             medal = ["🥇", "🥈", "🥉"][i] if i < 3 else "🏅"
             st.markdown(f"""
             <div class="pareja-card">
                 <h4>{medal} {" & ".join(pareja["jugadores"])}</h4>
                 <p>Victorias: {pareja["victorias"]} | Derrotas: {pareja["derrotas"]}</p>
-            </div>
-            """, unsafe_allow_html=True)
+            </div>""", unsafe_allow_html=True)
 
 
 def show_parejas_management():
-    """Gestión de parejas"""
-    st.header("👥 Parejas")
-
-    # Formulario para añadir pareja
+    st.header("👥 Gestión de Parejas")
     st.subheader("➕ Añadir Nueva Pareja")
-
     with st.form("add_pareja_form"):
         col1, col2 = st.columns(2)
         with col1:
             jugador1 = st.text_input("🏃 Jugador 1", placeholder="Nombre del jugador 1")
         with col2:
             jugador2 = st.text_input("🏃 Jugador 2", placeholder="Nombre del jugador 2")
-
         add_button = st.form_submit_button("➕ Añadir Pareja", use_container_width=True)
-
         if add_button:
             if jugador1.strip() and jugador2.strip():
                 if jugador1.strip() != jugador2.strip():
@@ -541,26 +536,18 @@ def show_parejas_management():
                     st.error("❌ Los jugadores deben ser diferentes")
             else:
                 st.error("❌ Por favor, complete ambos nombres")
-
     st.markdown("---")
-
-    # Lista de parejas existentes
     torneo = initialize_tournament()
-
     if torneo["parejas"]:
         st.subheader(f"📝 Parejas Registradas ({len(torneo['parejas'])})")
-
         for pareja in torneo["parejas"]:
             col1, col2 = st.columns([3, 1])
-
             with col1:
                 st.markdown(f"""
                 <div class="pareja-card">
                     <h4>👥 {" & ".join(pareja["jugadores"])}</h4>
                     <p>Victorias: {pareja["victorias"]} | Derrotas: {pareja["derrotas"]}</p>
-                </div>
-                """, unsafe_allow_html=True)
-
+                </div>""", unsafe_allow_html=True)
             with col2:
                 if st.button(f"🗑️", key=f"delete_{pareja['id']}", help="Eliminar pareja"):
                     remove_pareja(pareja["id"])
@@ -570,12 +557,8 @@ def show_parejas_management():
 
 
 def show_partidos_management():
-    """Gestión de partidos"""
-    st.header("🏆 Partidos")
-
+    st.header("🏆 Gestión de Partidos")
     torneo = initialize_tournament()
-
-    # Botón para generar jornada
     if len(torneo["parejas"]) >= 2:
         if st.button("🎯 Generar Nueva Jornada", use_container_width=True):
             success, message = generate_jornada()
@@ -586,63 +569,46 @@ def show_partidos_management():
                 st.warning(f"⚠️ {message}")
     else:
         st.info("👥 Se necesitan al menos 2 parejas para generar partidos")
-
     st.markdown("---")
-
     if torneo["partidos"]:
         st.subheader(f"📋 Partidos ({len(torneo['partidos'])})")
-
-        # Filtros
         filter_col1, filter_col2 = st.columns(2)
         with filter_col1:
             mostrar_completados = st.checkbox("✅ Mostrar completados", value=True)
         with filter_col2:
             mostrar_pendientes = st.checkbox("⏳ Mostrar pendientes", value=True)
-
         partidos_filtrados = torneo["partidos"]
         if not mostrar_completados:
             partidos_filtrados = [p for p in partidos_filtrados if not p["ganador_id"]]
         if not mostrar_pendientes:
             partidos_filtrados = [p for p in partidos_filtrados if p["ganador_id"]]
-
         for partido in partidos_filtrados:
             pareja1 = next(p for p in torneo["parejas"] if p["id"] == partido["pareja1_id"])
             pareja2 = next(p for p in torneo["parejas"] if p["id"] == partido["pareja2_id"])
-
             st.markdown(f"""
             <div class="partido-card">
                 <div class="partido-header">🏆 Partido #{partido["id"]}</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-            # Información de las parejas
+            </div>""", unsafe_allow_html=True)
             col1, col2, col3 = st.columns([2, 1, 2])
-
             with col1:
                 st.markdown(f"**👥 {' & '.join(pareja1['jugadores'])}**")
                 st.caption(f"Victorias: {pareja1['victorias']}")
-
             with col2:
                 st.markdown("<div style='text-align: center; font-size: 2rem;'>⚔️</div>", unsafe_allow_html=True)
-
             with col3:
                 st.markdown(f"**👥 {' & '.join(pareja2['jugadores'])}**")
                 st.caption(f"Victorias: {pareja2['victorias']}")
-
-            # Selector de ganador
             ganador_actual = partido["ganador_id"]
             opciones = [
                 (None, "Sin resultado"),
                 (pareja1["id"], f"🏆 {' & '.join(pareja1['jugadores'])}"),
                 (pareja2["id"], f"🏆 {' & '.join(pareja2['jugadores'])}")
             ]
-
             index_actual = 0
             for i, (id_pareja, _) in enumerate(opciones):
                 if id_pareja == ganador_actual:
                     index_actual = i
                     break
-
             ganador_seleccionado = st.radio(
                 "Seleccionar ganador:",
                 options=[opcion[1] for opcion in opciones],
@@ -650,33 +616,25 @@ def show_partidos_management():
                 key=f"ganador_{partido['id']}",
                 horizontal=True
             )
-
-            # Actualizar resultado
             ganador_id_seleccionado = None
             for id_pareja, texto in opciones:
                 if texto == ganador_seleccionado:
                     ganador_id_seleccionado = id_pareja
                     break
-
             if ganador_id_seleccionado != ganador_actual:
                 if st.button(f"💾 Guardar Resultado", key=f"save_{partido['id']}", use_container_width=True):
                     update_resultado(partido["id"], ganador_id_seleccionado)
                     st.success("✅ Resultado guardado")
                     st.rerun()
-
             st.markdown("---")
     else:
         st.info("🏆 No hay partidos generados. Genera una jornada para comenzar.")
 
 
 def show_clasificacion():
-    """Muestra la clasificación actual"""
     st.header("📈 Clasificación")
-
     clasificacion = get_clasificacion()
-
     if clasificacion:
-        # Crear tabla de clasificación
         data = []
         for i, pareja in enumerate(clasificacion):
             posicion = i + 1
@@ -685,7 +643,6 @@ def show_clasificacion():
             derrotas = pareja["derrotas"]
             partidos_jugados = victorias + derrotas
             porcentaje_victoria = (victorias / partidos_jugados * 100) if partidos_jugados > 0 else 0
-
             data.append({
                 "Pos": posicion,
                 "Pareja": nombre_pareja,
@@ -694,17 +651,12 @@ def show_clasificacion():
                 "D": derrotas,
                 "% Victoria": f"{porcentaje_victoria:.1f}%"
             })
-
         df = pd.DataFrame(data)
-
-        # Mostrar como tabla HTML personalizada
         st.markdown("### 🏆 Tabla de Clasificación")
-
         table_html = '<table class="clasificacion-table"><thead><tr>'
         for col in df.columns:
             table_html += f'<th>{col}</th>'
         table_html += '</tr></thead><tbody>'
-
         for _, row in df.iterrows():
             table_html += '<tr>'
             for col in df.columns:
@@ -714,61 +666,40 @@ def show_clasificacion():
                 else:
                     table_html += f'<td>{row[col]}</td>'
             table_html += '</tr>'
-
         table_html += '</tbody></table>'
         st.markdown(table_html, unsafe_allow_html=True)
-
-        # Estadísticas adicionales
         st.markdown("---")
         st.subheader("📊 Estadísticas del Torneo")
-
         total_partidos = sum(p["victorias"] + p["derrotas"] for p in clasificacion) // 2
         total_parejas = len(clasificacion)
         partidos_posibles = total_parejas * (total_parejas - 1) // 2 if total_parejas > 1 else 0
         progreso = (total_partidos / partidos_posibles * 100) if partidos_posibles > 0 else 0
-
         col1, col2, col3 = st.columns(3)
-
         with col1:
-            st.metric("🎯 Partidos Jugados", total_partidos, delta=None)
-
+            st.metric("🎯 Partidos Jugados", total_partidos)
         with col2:
-            st.metric("📊 Partidos Posibles", partidos_posibles, delta=None)
-
+            st.metric("📊 Partidos Posibles", partidos_posibles)
         with col3:
-            st.metric("⚡ Progreso", f"{progreso:.1f}%", delta=None)
-
-        # Barra de progreso
+            st.metric("⚡ Progreso", f"{progreso:.1f}%")
         st.progress(progreso / 100)
-
     else:
         st.info("📊 No hay datos de clasificación. Registra parejas y juega algunos partidos para ver la clasificación.")
 
 
 def show_configuration():
-    """Configuración del sistema (solo admin)"""
     st.header("⚙️ Configuración")
-
     current_user = get_current_user()
-
     if current_user != "admin":
         st.error("🔒 Solo el administrador puede acceder a esta sección")
         return
-
     st.success("🔑 Acceso de administrador confirmado")
-
-    # Gestión de usuarios
     st.subheader("👥 Gestión de Usuarios")
-
     users = load_json(USUARIOS_FILE, {})
-
-    # Crear nuevo usuario
     with st.expander("➕ Crear Nuevo Usuario"):
         with st.form("create_user_form"):
             new_username = st.text_input("👤 Nombre de usuario", placeholder="Ingrese nombre de usuario")
             new_password = st.text_input("🔑 Contraseña", type="password", placeholder="Ingrese contraseña")
             create_button = st.form_submit_button("➕ Crear Usuario", use_container_width=True)
-
             if create_button:
                 if new_username and new_password:
                     if new_username not in users:
@@ -780,8 +711,6 @@ def show_configuration():
                         st.error("❌ El usuario ya existe")
                 else:
                     st.error("❌ Complete todos los campos")
-
-    # Lista de usuarios existentes
     st.write("**Usuarios Registrados:**")
     for username in users.keys():
         col1, col2 = st.columns([3, 1])
@@ -790,40 +719,28 @@ def show_configuration():
                 st.write(f"👑 {username} (Administrador)")
             else:
                 st.write(f"👤 {username}")
-
         with col2:
-            if username != "admin":  # No permitir eliminar admin
+            if username != "admin":
                 if st.button(f"🗑️", key=f"delete_user_{username}", help="Eliminar usuario"):
                     del users[username]
                     save_json(USUARIOS_FILE, users)
                     st.success(f"✅ Usuario '{username}' eliminado")
                     st.rerun()
-
     st.markdown("---")
-
-    # Gestión del torneo
     st.subheader("🏆 Gestión del Torneo")
-
     torneo = initialize_tournament()
-
-    # Estadísticas del torneo
     col1, col2 = st.columns(2)
     with col1:
         st.metric("👥 Total Parejas", len(torneo["parejas"]))
     with col2:
         st.metric("🏆 Total Partidos", len(torneo["partidos"]))
-
-    # Botón para reiniciar torneo
     st.warning("⚠️ **Zona de Peligro**")
-
     if st.button("🔄 Reiniciar Torneo Completo", use_container_width=True, type="secondary"):
         if "confirm_reset" not in st.session_state:
             st.session_state.confirm_reset = True
             st.rerun()
-
     if st.session_state.get("confirm_reset", False):
         st.error("⚠️ **¿Estás seguro? Esta acción eliminará todas las parejas y partidos.**")
-
         col1, col2 = st.columns(2)
         with col1:
             if st.button("✅ Sí, Reiniciar", use_container_width=True):
@@ -831,15 +748,11 @@ def show_configuration():
                 st.session_state.confirm_reset = False
                 st.success("✅ Torneo reiniciado correctamente")
                 st.rerun()
-
         with col2:
             if st.button("❌ Cancelar", use_container_width=True):
                 st.session_state.confirm_reset = False
                 st.rerun()
-
     st.markdown("---")
-
-    # Información del sistema
     st.subheader("ℹ️ Información del Sistema")
     st.info(f"""
     **📱 Aplicación:** Torneo de Pádel v1.0
