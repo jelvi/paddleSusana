@@ -1,0 +1,31 @@
+{
+  "parejas": [
+    {
+      "id": 1,
+      "jugadores": [
+        "Irache",
+        "Mathilde"
+      ],
+      "victorias": 1,
+      "derrotas": 0
+    },
+    {
+      "id": 2,
+      "jugadores": [
+        "Susana",
+        "Thorsten"
+      ],
+      "victorias": 0,
+      "derrotas": 1
+    }
+  ],
+  "partidos": [
+    {
+      "id": 1,
+      "pareja1_id": 1,
+      "pareja2_id": 2,
+      "ganador_id": 1,
+      "fecha": "2025-08-08T10:16:57.443741"
+    }
+  ]
+}
