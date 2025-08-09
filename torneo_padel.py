@@ -453,7 +453,7 @@ def show_main_app(page):
 
 
 def show_dashboard():
-    st.header("📊 Dashboard del Torneo")
+    st.header("📊 Torneo")
     torneo = initialize_tournament()
     col1, col2, col3, col4 = st.columns(4)
     with col1:
@@ -488,7 +488,7 @@ def show_dashboard():
         </div>""", unsafe_allow_html=True)
     st.markdown("---")
     if torneo["partidos"]:
-        st.subheader("⏳ Próximos Partidos")
+        st.subheader("⏳ Partidos")
         partidos_pendientes = [p for p in torneo["partidos"] if not p["ganador_id"]][:3]
         if partidos_pendientes:
             for partido in partidos_pendientes:
@@ -514,7 +514,7 @@ def show_dashboard():
 
 
 def show_parejas_management():
-    st.header("👥 Gestión de Parejas")
+    st.header("👥 Parejas")
     st.subheader("➕ Añadir Nueva Pareja")
     with st.form("add_pareja_form"):
         col1, col2 = st.columns(2)
@@ -557,7 +557,7 @@ def show_parejas_management():
 
 
 def show_partidos_management():
-    st.header("🏆 Gestión de Partidos")
+    st.header("🏆 Partidos")
     torneo = initialize_tournament()
     if len(torneo["parejas"]) >= 2:
         if st.button("🎯 Generar Nueva Jornada", use_container_width=True):
@@ -763,7 +763,6 @@ def show_configuration():
     - Usuarios: `{USUARIOS_FILE}`
     - Torneo: `{TORNEO_FILE}`
 
-    **🔧 Desarrollado con:** Streamlit + Python
     """)
 
 
