@@ -404,6 +404,7 @@ def main():
                 if st.button(label, key=f"menu_btn_{page_key}"):
                     st.session_state.page = page_key
                     st.session_state.sidebar_state = "collapsed"
+                    st.rerun()
             if st.button("🚪 Cerrar Sesión", use_container_width=True):
                 logout_user()
                 st.rerun()
