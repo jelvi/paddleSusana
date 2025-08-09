@@ -8,11 +8,16 @@ import pandas as pd
 from datetime import datetime
 
 # Configuración inicial de la página
+
+# Ajusta el estado del sidebar en session_state si no existe
+if "sidebar_state" not in st.session_state:
+    st.session_state.sidebar_state = "expanded"
+
 st.set_page_config(
     page_title="Torneo de Pádel",
     page_icon="🎾",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state=st.session_state.sidebar_state,
 )
 
 # CSS personalizado para título compacto y tema claro
@@ -398,6 +403,7 @@ def main():
             for label, page_key in pages.items():
                 if st.button(label, key=f"menu_btn_{page_key}"):
                     st.session_state.page = page_key
+                    st.session_state.sidebar_state = "collapsed"
             if st.button("🚪 Cerrar Sesión", use_container_width=True):
                 logout_user()
                 st.rerun()
