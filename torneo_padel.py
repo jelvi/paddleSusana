@@ -402,11 +402,14 @@ def main():
             }
             for label, page_key in pages.items():
                 if st.button(label, key=f"menu_btn_{page_key}"):
-                    st.session_state.page = page_key
                     st.session_state.sidebar_state = "collapsed"
+                    st.session_state.page = page_key
                     st.rerun()
             if st.button("🚪 Cerrar Sesión", use_container_width=True):
                 logout_user()
+                st.rerun()
+            if st.button("Colapsar sidebar"):
+                st.session_state.sidebar_state = "collapsed"
                 st.rerun()
         else:
             st.info("🔒 No autenticado")
